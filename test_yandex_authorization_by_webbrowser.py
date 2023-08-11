@@ -12,34 +12,37 @@ import firefox_path
 import yandex_account
 
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def ff_path():
   return firefox_path.path
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def authorization_page_url():
   return 'https://passport.yandex.ru/auth'
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def login():
   return yandex_account.login
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def pwd():
   return yandex_account.pwd
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def personal_account_url():
   return 'https://id.yandex.ru/'
 
-@pytest.fixture
-def driver(ff_path, authorization_page_url):
+@pytest.fixture(scope='module')
+def driver(ff_path):
   options = Options()
   options.binary = FirefoxBinary(ff_path)
 
   driver = webdriver.Firefox(options=options)
-  yield driver
-  
+  return driver
+
+@pytest.fixture
+def logout_and_closing(driver, authorization_page_url):
+  yield
   # After testing
   # Logout and closing browser
   try:
@@ -74,7 +77,7 @@ def driver(ff_path, authorization_page_url):
     driver.quit()
 
 def test_auth_with_mail(driver, authorization_page_url, login, pwd,
-  personal_account_url):
+  personal_account_url, logout_and_closing):
   # Opening authorization page
   driver.get(authorization_page_url)
 
